@@ -5,7 +5,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from PIL import Image
 def image_getter(area: str):
-    num_images = 1000
+    num_images = 100
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
@@ -94,3 +94,4 @@ if __name__ == "__main__":
     p6.join()
     p7.join()
     p8.join()
+ 
