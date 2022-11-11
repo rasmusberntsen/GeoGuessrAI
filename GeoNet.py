@@ -1,0 +1,91 @@
+# Importing packages
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Import ImageDataset
+from dataloader import ImageDataset
+
+# Importing training loop
+from TrainingLoop import Optimization
+
+# Import countries data
+data = ImageDataset()
+
+# Split data into train and test
+train_set, test_set, val_set = torch.utils.data.random_split(data, [0.05, 0.9, 0.05])
+
+# Create loaders
+batch_size = 16
+trainloader = torch.utils.data.DataLoader(
+    train_set,
+    batch_size=batch_size,
+    shuffle=True
+)
+testloader = torch.utils.data.DataLoader(
+    test_set,
+    batch_size=batch_size,
+    shuffle=True
+)
+valloader = torch.utils.data.DataLoader(
+    val_set,
+    batch_size=batch_size,
+    shuffle=True
+)
+
+# Create a pytorch CNN that classify countries
+num_countries = 13
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(3, 4, 3, 1)
+        self.conv2 = nn.Conv2d(4, 4, 3, 1)
+        self.conv3 = nn.Conv2d(4, 2, 3, 1)
+        self.fc1 = nn.Linear(2 * 126 * 254, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, num_countries)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, 2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2)
+        x = F.relu(self.conv3(x))
+        x = F.max_pool2d(x, 2)
+        x = x.flatten(1)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        x = F.log_softmax(x, dim=1)
+        return x
+
+
+# Test the network
+trainiter = iter(trainloader)
+images, labels = next(trainiter)
+# Make images float
+images = images.float()
+net = Net()
+net(images)
+
+
+# Defining parameters 
+num_epochs = 100
+lr = 0.001
+
+# device
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('device: ', device)
+
+# binary cross entropy loss
+loss_fn = nn.CrossEntropyLoss()
+model = Net()
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+optimization = Optimization(model, loss_fn, optimizer, device)
+optimization.train(trainloader, valloader, num_epochs)
+optimization.plot_losses()
