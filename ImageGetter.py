@@ -5,7 +5,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from PIL import Image
 def image_getter(area: str):
-    num_images = 100
+    num_images = 200
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
@@ -69,22 +69,24 @@ def image_getter(area: str):
 
 if __name__ == "__main__":
     from multiprocessing import Process
-    p1 = Process(target=image_getter, args=("dk",))
+    p1 = Process(target=image_getter, args=("ee",))
     p1.start()
-    p2 = Process(target=image_getter, args=("dk",))
+    p2 = Process(target=image_getter, args=("es",))
     p2.start()
-    p3 = Process(target=image_getter, args=("no",))
+    p3 = Process(target=image_getter, args=("fr",))
     p3.start()
-    p4 = Process(target=image_getter, args=("no",))
+    p4 = Process(target=image_getter, args=("gb",))
     p4.start()
-    p5 = Process(target=image_getter, args=("se",))
+    p5 = Process(target=image_getter, args=("gr",))
     p5.start()
-    p6 = Process(target=image_getter, args=("se",))
+    p6 = Process(target=image_getter, args=("it",))
     p6.start()
-    p7 = Process(target=image_getter, args=("de",))
+    p7 = Process(target=image_getter, args=("pl",))
     p7.start()
-    p8 = Process(target=image_getter, args=("de",))
+    p8 = Process(target=image_getter, args=("ro",))
     p8.start()
+    p9 = Process(target=image_getter, args=("ua",))
+    p9.start()
 
     p1.join()
     p2.join()
@@ -94,4 +96,5 @@ if __name__ == "__main__":
     p6.join()
     p7.join()
     p8.join()
+    p9.join()
  

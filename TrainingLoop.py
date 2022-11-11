@@ -1,3 +1,7 @@
+from matplotlib import pyplot as plt
+import numpy as np
+import torch
+
 class Optimization:
     def __init__(self, model, loss_fn, optimizer, device):
         self.model = model.to(device)
@@ -11,12 +15,11 @@ class Optimization:
         # Set model to training mode
         self.model.train()
         # Forward pass
-        y_pred = self.model(x)
-        # print(y)
-        y_pred = y_pred.view(-1, 1)
+        y_pred = self.model(x.float())
+        y_pred = y_pred.view(-1, 13)
+        # Select max value from output
         # Compute Loss
         loss = self.loss_fn(y_pred, y)
-        # print(y_pred)
         # Backward pass
         self.optimizer.zero_grad()
         # Loss requires grad
@@ -28,15 +31,13 @@ class Optimization:
         return loss.item()
 
     def train(self, train_loader, val_loader, epochs):
-        for epoch in range(epochs):
+        for epoch in range(1, epochs+1):
             batch_losses = []
 
             for x_batch, y_batch in train_loader:
-                b_size = x_batch.size(0)
-                x_batch = x_batch.view([b_size, -1, 1]).to(device)
-                y_batch = y_batch.to(self.device)
+                x_batch = x_batch.to(self.device)#.to_float()
+                y_batch = y_batch.to(self.device)#.to_float()
                 train_loss = self.train_step(x_batch, y_batch)
-                # print('train loss: ', train_loss)
                 batch_losses.append(train_loss)
                 
             train_loss = np.mean(batch_losses)
@@ -46,14 +47,13 @@ class Optimization:
             with torch.no_grad():
                 batch_val_losses = []
                 for x_val, y_val in val_loader:
-                    b_size = x_val.size(0)
-                    x_val = x_val.view([b_size, -1, 1]).to(device)
+                    x_val = x_val.to(self.device)
                     y_val = y_val.to(self.device)
                     # Set model to evaluation mode
                     self.model.eval()
                     # Forward pass
-                    y_pred = self.model(x_val)
-                    y_pred = y_pred.view(-1, 1)
+                    y_pred = self.model(x_val.float())
+                    y_pred = y_pred.view(-1, 13)
                     # Compute Loss
                     val_loss = self.loss_fn(y_pred, y_val)
                     batch_val_losses.append(val_loss.item())
@@ -69,8 +69,8 @@ class Optimization:
             predictions = []
             values = []
             for x_test, y_test in test_loader:
-                x_test = x_test.view([batch_size, -1, n_features]).to(device)
-                y_test = y_test.to(device)
+                x_test = x_test.view([batch_size, -1, n_features]).to(self.device)
+                y_test = y_test.to(self.device)
                 self.model.eval()
                 yhat = self.model(x_test)
                 predictions.append(yhat.to('cpu').detach().numpy())
