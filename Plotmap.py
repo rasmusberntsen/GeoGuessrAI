@@ -2,6 +2,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
+
 def plot_map(probs, ground_truth, countries):
     world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
     plot_countries = world[world["name"].isin(countries)]
@@ -11,20 +12,16 @@ def plot_map(probs, ground_truth, countries):
     # getting the prediction as the country with the highest probability
     prediction = plot_countries["name"].iloc[plot_countries["prob"].idxmax()]
     print(prediction)
-    ax = plot_countries.plot(
-        column="prob", figsize=(15, 10), edgecolor="black"
-    )
+    ax = plot_countries.plot(column="prob", figsize=(15, 10), edgecolor="black")
     plot_countries[plot_countries["name"] == ground_truth].plot(
-        ax=ax, facecolor='none', edgecolor="lime", linewidth=4
+        ax=ax, facecolor="none", edgecolor="lime", linewidth=4
     )
     plot_countries[plot_countries["name"] == prediction].plot(
-        ax=ax, facecolor='none', edgecolor="red", linewidth=1
+        ax=ax, facecolor="none", edgecolor="red", linewidth=1
     )
     # add colorbar and remove axis and frame
-    sm = plt.cm.ScalarMappable(
-        cmap="viridis", norm=plt.Normalize(vmin=0, vmax=1)
-    )
-    ax.axis("off") # remove axis
+    sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=0, vmax=1))
+    ax.axis("off")  # remove axis
     plt.colorbar(sm)
     plt.title("Predictions")
     # legend with "green": Ground truth
@@ -34,7 +31,8 @@ def plot_map(probs, ground_truth, countries):
     plt.legend(handles=[green_patch, red_patch], loc="center left")
     plt.show()
 
-p = 1/13
+
+p = 1 / 13
 probs = {
     "Germany": p,
     "Denmark": p,
