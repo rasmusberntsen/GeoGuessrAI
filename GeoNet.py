@@ -23,7 +23,7 @@ data = ImageDataset()
 train_set, test_set, val_set = torch.utils.data.random_split(data, [0.64, 0.2, 0.16])
 
 # Create loaders
-batch_size = 16
+batch_size = 2
 trainloader = torch.utils.data.DataLoader(
     train_set,
     batch_size=batch_size,
@@ -71,10 +71,15 @@ class Net(nn.Module):
 trainiter = iter(trainloader)
 images, labels = next(trainiter)
 # Make images float
-images = images.float()
+images = images.float().cuda()
 # net = Net()
-net = resnet18(pretrained=True)
-net(images)
+# Create a resnet18 with 13 outputs
+net = resnet18(pretrained=True).cuda()
+net.fc = nn.Linear(512, num_countries)
+# Make the network use the GPU
+net = net.cuda()
+# Get the output
+output = net(images)
 
 
 # Defining parameters 
@@ -87,7 +92,8 @@ print('device: ', device)
 
 # binary cross entropy loss
 loss_fn = nn.CrossEntropyLoss()
-model = Net()
+model = resnet18().cuda()
+model.fc = nn.Linear(512, num_countries)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 optimization = Optimization(model, loss_fn, optimizer, device)
