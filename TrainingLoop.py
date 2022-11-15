@@ -10,6 +10,8 @@ class Optimization:
         self.device = device
         self.train_losses = []
         self.val_losses = []
+        self.train_accuracy = []
+        self.val_accuracy = []
     
     def train_step(self, x, y):
         # Set model to training mode
@@ -27,26 +29,36 @@ class Optimization:
         loss.backward()
         self.optimizer.step()
 
+        # calculate accuracy
+        prediction = torch.argmax(y_pred, dim=1) 
+        correct = (prediction == y).float()
+        accuracy = correct.sum() / len(correct)
+
         # Return the loss
-        return loss.item()
+        return loss.item(), accuracy # accuracy
 
     def train(self, train_loader, val_loader, epochs):
         for epoch in range(1, epochs+1):
             batch_losses = []
+            batch_accuray = []
 
             for x_batch, y_batch in train_loader:
                 x_batch = x_batch.to(self.device)#.to_float()
                 y_batch = y_batch.to(self.device)#.to_float()
-                train_loss = self.train_step(x_batch, y_batch)
+                train_loss, accuracy = self.train_step(x_batch, y_batch)
                 batch_losses.append(train_loss)
+                batch_accuray.append(accuracy) # accuracy
                 print("Batch loss: ", train_loss)
                 
             train_loss = np.mean(batch_losses)
+            train_accuracy = np.mean(batch_accuray) # accuracy
             self.train_losses.append(train_loss)
+            self.train_accuracy.append(train_accuracy) # accuracy
 
             # Validation
             with torch.no_grad():
                 batch_val_losses = []
+                batch_val_accuracy = []
                 for x_val, y_val in val_loader:
                     x_val = x_val.to(self.device)
                     y_val = y_val.to(self.device)
@@ -58,24 +70,29 @@ class Optimization:
                     # Compute Loss
                     val_loss = self.loss_fn(y_pred, y_val)
                     batch_val_losses.append(val_loss.item())
+                    # compute accuracy
+                    prediction = torch.argmax(y_pred, dim=1)
+                    correct = (prediction == y_val).float()
+                    accuracy = correct.sum() / len(correct) # accuracy
+                    batch_val_accuracy.append(accuracy) # accuracy
+
                 val_loss = np.mean(batch_val_losses)
                 self.val_losses.append(val_loss)
-            
+                val_accuracy = np.mean(batch_val_accuracy) # accuracy
+                self.val_accuracy.append(val_accuracy) # accuracy
             # Printing progress
             #if epoch % 10 == 0:
             print(f'Epoch {epoch}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
 
-    def evaluate(self, test_loader, batch_size=1, n_features=1):
+    def evaluate(self, test_loader):
         with torch.no_grad():
             predictions = []
             values = []
             for x_test, y_test in test_loader:
-                x_test = x_test.view([batch_size, -1, n_features]).to(self.device)
+                x_test = x_test.to(self.device)
                 y_test = y_test.to(self.device)
-                self.model.eval()
-                yhat = self.model(x_test)
-                predictions.append(yhat.to('cpu').detach().numpy())
-                predictions = [1 if x > 0.5 else 0 for x in predictions]
+                yhat = self.model(x_test.float())
+                predictions.append(np.argmax(yhat.to('cpu').detach().numpy()))
                 values.append(y_test.to('cpu').detach().numpy())
 
         return predictions, values
@@ -85,4 +102,11 @@ class Optimization:
         plt.plot(self.val_losses, label='Validation loss')
         plt.legend()
         plt.title('Training and Validation Losses')
+        plt.show()
+
+    def plot_accuracy(self):
+        plt.plot(self.train_accuracy, label='Training accuracy')
+        plt.plot(self.val_accuracy, label='Validation accuracy')
+        plt.legend()
+        plt.title('Training and Validation Accuracy')
         plt.show()
