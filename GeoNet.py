@@ -91,6 +91,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('device: ', device)
 
 # binary cross entropy loss
+#borders = pd.read_csv("borderloss.csv", sep=";", header=None)
+#border_loss = lambda y_pred, y_true: borders.iloc[y_pred, y_true]
+#loss_fn = nn.CrossEntropyLoss + 0.5 * border_loss
 loss_fn = nn.CrossEntropyLoss()
 model = resnet18().cuda()
 model.fc = nn.Linear(512, num_countries)
