@@ -61,8 +61,8 @@ class Optimization:
                 self.val_losses.append(val_loss)
             
             # Printing progress
-            if epoch % 10 == 0:
-              print(f'Epoch {epoch}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
+            #if epoch % 10 == 0:
+            print(f'Epoch {epoch}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
 
     def evaluate(self, test_loader, batch_size=1, n_features=1):
         with torch.no_grad():

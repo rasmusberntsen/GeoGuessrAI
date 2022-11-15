@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Import resnet18
+from torchvision.models import resnet18
+
 # Import ImageDataset
 from dataloader import ImageDataset
 
@@ -17,7 +20,7 @@ from TrainingLoop import Optimization
 data = ImageDataset()
 
 # Split data into train and test
-train_set, test_set, val_set = torch.utils.data.random_split(data, [0.05, 0.9, 0.05])
+train_set, test_set, val_set = torch.utils.data.random_split(data, [0.64, 0.2, 0.16])
 
 # Create loaders
 batch_size = 16
@@ -69,12 +72,13 @@ trainiter = iter(trainloader)
 images, labels = next(trainiter)
 # Make images float
 images = images.float()
-net = Net()
+# net = Net()
+net = resnet18(pretrained=True)
 net(images)
 
 
 # Defining parameters 
-num_epochs = 100
+num_epochs = 10
 lr = 0.001
 
 # device
