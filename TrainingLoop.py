@@ -39,6 +39,7 @@ class Optimization:
                 y_batch = y_batch.to(self.device)#.to_float()
                 train_loss = self.train_step(x_batch, y_batch)
                 batch_losses.append(train_loss)
+                print("Batch loss: ", train_loss)
                 
             train_loss = np.mean(batch_losses)
             self.train_losses.append(train_loss)
