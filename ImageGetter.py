@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -5,14 +6,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from PIL import Image
 def image_getter(area: str):
-    num_images = 200
+    num_images = 1000
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     countries = [area]
     # Get html from randomstreetview.com
     for country in countries:
-        driver.get(f"https://www.randomstreetview.com/{country}")
+        driver.get(f"https://www.randomstreetview.com/{'no'}")
         # Load images
         im = 0
         while im < num_images:
@@ -35,7 +36,7 @@ def image_getter(area: str):
             if panoid == "":
                 driver.refresh()
                 print("Missing link")
-                continue
+                # continue
             images = []
             for x in [0, 1, 2, 3]:
                 for y in [0, 1]:
@@ -44,6 +45,17 @@ def image_getter(area: str):
                     image = Image.open(requests.get(url, stream=True).raw)
                     # Add the image to the list
                     images.append(image)
+
+            # Plot the images in a grid
+            fig, axs = plt.subplots(2, 4)
+            for i in range(4):
+                for j in range(2):
+                    axs[j, i].imshow(images[i*2+j])
+                    axs[j, i].axis('off')
+            # Make less space between the images
+            plt.subplots_adjust(wspace=0.2, hspace=-0.4)
+            plt.show()
+            # Save the images
 
             # Stich the images together
             # Create a new image
@@ -60,7 +72,7 @@ def image_getter(area: str):
 
 
             # Save the image as the name Address
-            new_image.save(f"images/{country}/{address}.png")
+            new_image.save(f"ImageAfterMikkel.png")
             im += 1
             # Reload the page
             driver.refresh()
